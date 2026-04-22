@@ -32,7 +32,7 @@ function Notifications() {
         // ✅ Get all notifications
         const res = await fetch("http://localhost:5000/api/notifications", {
           headers: {
-            Authorization: `Bearer ${token} `,
+            Authorization: `Bearer ${token}`,
           },
         });
 
@@ -43,7 +43,7 @@ function Notifications() {
         await fetch("http://localhost:5000/api/notifications/read-all", {
           method: "PUT",
           headers: {
-            Authorization: `Bearer ${token} `,
+            Authorization: `Bearer ${token}`,
           },
         });
 
