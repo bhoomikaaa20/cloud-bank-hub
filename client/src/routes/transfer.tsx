@@ -27,7 +27,7 @@ function Transfer() {
   const [loading, setLoading] = useState(false);
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<SearchResult[]>([]);
-
+  const [recipients, setRecipients] = useState<SearchResult[]>([]);
   // ONLY LOGIC CHANGED — UI SAME
 
   useEffect(() => {
@@ -39,7 +39,7 @@ function Transfer() {
 
         const res = await fetch("http://localhost:5000/api/accounts/balance", {
           headers: {
-            Authorization: `Bearer ${token} `,
+            Authorization: `Bearer ${token}`,
           },
         });
 
@@ -55,36 +55,7 @@ function Transfer() {
   }, [user]);
 
   // 🔍 SEARCH USERS
-  useEffect(() => {
-    if (query.length < 2) {
-      setResults([]);
-      return;
-    }
-
-    const t = setTimeout(async () => {
-      try {
-        const token = localStorage.getItem("token");
-
-        const res = await fetch(
-          `http://localhost:5000/api/accounts/search?query=${query}`,
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        );
-
-        const data = await res.json();
-        setResults(data);
-
-      } catch (err) {
-        console.error(err);
-      }
-    }, 300);
-
-    return () => clearTimeout(t);
-  }, [query]);
-
+  useEffect(() => { if (!user) return; const loadRecipients = async () => { try { const token = localStorage.getItem("token"); const res = await fetch("http://localhost:5000/api/accounts/all", { headers: { Authorization: `Bearer ${token}`, }, }); const data = await res.json(); setRecipients(data); } catch (err) { console.error(err); } }; loadRecipients(); }, [user]);
   // 💸 TRANSFER
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -140,9 +111,31 @@ function Transfer() {
           <form onSubmit={submit} className="space-y-5">
             <div>
               <Label>Find recipient (name or email)</Label>
-              <div className="relative">
-                <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                <Input className="pl-9" placeholder="Search users..." value={query} onChange={(e) => setQuery(e.target.value)} />
+              <div>
+
+                <select
+                  className="w-full mt-1 border border-border rounded-md p-2 bg-background"
+                  value={accountNumber}
+                  onChange={(e) => {
+                    const selected = recipients.find(
+                      (r) => r.account_number === e.target.value
+                    );
+
+                    setAccountNumber(e.target.value);
+
+                    if (selected) {
+                      setQuery(selected.full_name);
+                    }
+                  }}
+                >
+                  <option value="">Select user</option>
+
+                  {recipients.map((r) => (
+                    <option key={r.account_number} value={r.account_number}>
+                      {r.full_name} — {r.account_number}
+                    </option>
+                  ))}
+                </select>
               </div>
               {results.length > 0 && (
                 <div className="mt-2 border border-border rounded-md divide-y divide-border bg-background">

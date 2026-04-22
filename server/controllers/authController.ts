@@ -2,12 +2,10 @@ import { Request, Response } from "express";
 import bcrypt from "bcryptjs";
 import User from "../models/User";
 import { generateToken } from "../utils/generateToken";
+import Account from "../models/Account";
 
 export const signup = async (req: Request, res: Response) => {
     const { name, email, password } = req.body;
-
-    const exists = await User.findOne({ email });
-    if (exists) return res.status(400).json({ message: "User already exists" });
 
     const hashed = await bcrypt.hash(password, 10);
 
@@ -15,6 +13,16 @@ export const signup = async (req: Request, res: Response) => {
         name,
         email,
         password: hashed,
+    });
+
+    // ✅ CREATE ACCOUNT WITH 1000 BALANCE
+    await Account.create({
+        user: user._id,
+        account_name: name,
+        account_number: Math.floor(
+            1000000000 + Math.random() * 9000000000
+        ).toString(),
+        balance: 1000,
     });
 
     res.json({

@@ -64,10 +64,6 @@ export const getBalance = async (req: AuthRequest, res: Response) => {
 // 🔹 SEARCH accounts/users
 export const searchAccounts = async (req: AuthRequest, res: Response) => {
     try {
-        if (!req.user?._id) {
-            return res.status(401).json({ message: "Unauthorized" });
-        }
-
         const query = (req.query.query as string) || "";
 
         if (query.length < 2) {
@@ -81,6 +77,35 @@ export const searchAccounts = async (req: AuthRequest, res: Response) => {
             ],
             _id: { $ne: req.user._id },
         }).limit(5);
+
+        const userIds = users.map((u) => u._id);
+
+        const accounts = await Account.find({
+            user: { $in: userIds },
+        });
+
+        const result = accounts.map((a) => {
+            const u = users.find((u) => u._id.equals(a.user));
+
+            return {
+                account_number: a.account_number,
+                account_name: a.account_name,
+                user_id: a.user,
+                full_name: u?.name || "User",
+            };
+        });
+
+        res.json(result);
+
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ message: "Server error" });
+    }
+};
+
+export const getAllAccounts = async (req: AuthRequest, res: Response) => {
+    try {
+        const users = await User.find({ _id: { $ne: req.user._id } });
 
         const userIds = users.map((u) => u._id);
 

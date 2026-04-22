@@ -17,11 +17,15 @@ export function AppHeader() {
       try {
         const token = localStorage.getItem("token");
 
-        const res = await fetch("http://localhost:5000/api/notifications/unread-count", {
-          headers: {
-            Authorization: `Bearer ${token} `,
-          },
-        });
+        const res = await fetch(
+          "http://localhost:5000/api/notifications/unread-count",
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+            cache: "no-store", // ✅ IMPORTANT
+          }
+        );
 
         const data = await res.json();
         setUnread(data.count || 0);
@@ -43,7 +47,7 @@ export function AppHeader() {
   const link = (to: string, label: string) => (
     <Link
       to={to}
-      className={`text - sm font - medium transition - colors hover: text - primary ${path === to ? "text-primary" : "text-muted-foreground"
+      className={`text-sm font-medium transition-colors hover:text-primary ${path === to ? "text-primary" : "text-muted-foreground"
         } `}
     >
       {label}
