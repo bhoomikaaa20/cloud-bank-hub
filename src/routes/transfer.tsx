@@ -68,7 +68,7 @@ function Transfer() {
     const { error } = await supabase.rpc("transfer_funds", {
       _receiver_account: accountNumber.trim(),
       _amount: amt,
-      _note: note || null,
+      _note: note || undefined,
     });
     setLoading(false);
     if (error) return toast.error(error.message);
